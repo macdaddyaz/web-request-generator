@@ -12,7 +12,6 @@ import java.net.http.HttpClient.Redirect;
 import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -50,9 +49,8 @@ public class WebRequestGenerator implements Callable<Integer> {
         var futures = new CompletableFuture[threads];
         for (int i = 0; i < threads; i++) {
             futures[i] = client
-                    .sendAsync(request, BodyHandlers.discarding())
-                    .thenApply(HttpResponse::statusCode)
-                    .thenAccept(System.out::println);
+                    .sendAsync(request, BodyHandlers.ofString())
+                    .thenAccept((response) -> System.out.printf("%d%n%s%n", response.statusCode(), response.body()));
         }
         CompletableFuture.allOf(futures).join();
         return 0;
